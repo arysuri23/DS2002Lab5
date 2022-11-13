@@ -2,6 +2,7 @@ import requests, pgeocode,  pymongo, pprint
 
 from bs4 import BeautifulSoup
 import pandas as pd
+import math
 
 #MONGODB VARIABLES
 host_name = "localhost"
@@ -23,10 +24,14 @@ print(f"Local Connection String: {conn_str['local']}")
 zipcode = input("Please enter a U.S. postal code that you would like to get 7-day forecast for: ")
 
 nomi = pgeocode.Nominatim("us")
-location = nomi.query_postal_code("22102")
-while location['place_name'] == "NaN":
-    zipcode = input("Invalid U.S. zipcode, enter a different one: ")
-    location = nomi.query_postal_code("221022")
+location = nomi.query_postal_code(zipcode)
+if isinstance(location['place_name'], float):
+    if math.isnan(location['place_name']):
+        while math.isnan(location['place_name']):
+            zipcode = input("Invalid U.S. zipcode, enter a different one: ")
+            location = nomi.query_postal_code(zipcode)
+            if not isinstance(location['place_name'], float):
+                break
 #convert to latitude and longitude
 lat = location['latitude']
 long = location['longitude']
